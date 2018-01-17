@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn import linear_model
 import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
 
 
 def readfile(path):
@@ -53,7 +54,9 @@ def timestamp(train_data, class_id):
 
 
 
-def linearRegression(id_dict, strategy):
+def chooseStrategy(id_dict, strategy):
+    dict_time = {}
+    dict_sales = {}
     for id, tup in id_dict.items():
         time = []
         sales = []
@@ -85,16 +88,36 @@ def linearRegression(id_dict, strategy):
                     max_sales = int(tu[1])
             time.append(current)
             sales.append(max_sales)
+        dict_time[id] = time
+        dict_sales[id] = sales
+    return dict_time, dict_sales
+
+
+def linearRegression(dict_time, dict_sales):
+    for id in dict_time.keys():
+        time = dict_time[id]
+        sales = dict_sales[id]
         reg = linear_model.LinearRegression()
+        poly = PolynomialFeatures(degree=2)
+        start = time[0]
+        time = list(map(lambda x: subMonth(start, x), time))
         time = np.array(time).reshape(-1, 1)
+        sales = np.array(sales).reshape(-1, 1)
+        poly_time = poly.fit_transform(time)
+        poly_sales = poly.fit_transform(sales)
         reg.fit(time, sales)
-        pre_sale = reg.predict([[201711]])
+        test = np.array([subMonth(start, 201711)]).reshape(-1, 1)
+        poly_test = poly.fit_transform(test)
+        pre_sale = reg.predict(test)
         print(pre_sale)
 
 
-
-
-
+def subMonth(start, time):
+    start_year = int(start / 100)
+    time_year = int(time / 100)
+    start_month = int(start % 100)
+    time_month = int(time % 100)
+    return ((time_year - start_year) * 12 + (time_month - start_month) * 1) + 1
 
 
 
@@ -107,7 +130,8 @@ if __name__ == "__main__":
 
     id_dict = timestamp(train_data, class_id)
 
-    #strategy = 'average'
-    strategy = 'max'
-    linearRegression(id_dict, strategy)
+    strategy = 'average'
+    #strategy = 'max'
+    dict_time, dict_sales = chooseStrategy(id_dict, strategy)
+    linearRegression(dict_time, dict_sales)
 

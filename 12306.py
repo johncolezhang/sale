@@ -25,6 +25,7 @@ class Buy_Tickets(object):
         self.ticket_url = 'https://kyfw.12306.cn/otn/leftTicket/init'
         self.driver_name = 'chrome'
         self.executable_path = '/Users/johncole/tool/chromedriver'
+        self.confirm_passenger = 'https://kyfw.12306.cn/otn/confirmPassenger/initDc'
 
     # 登录功能实现
     def login(self):
@@ -95,24 +96,26 @@ class Buy_Tickets(object):
                 self.driver.find_by_text(p).last.click()
                 sleep(1)
             print('提交订单...')
-            # sleep(1)
-            # self.driver.find_by_text(self.seat).click()
-            # sleep(1)
-            # self.driver.find_by_text(self.person).click()
             sleep(1)
+            bool = self.driver.find_by_id('seatType_1').first
+            # 按需选座没有完成
+            if not "二等座" in bool.text:
+                print("111")
             self.driver.find_by_id('submitOrder_id').click()
             sleep(1)
             print('确认选座...')
-            # self.driver.find_by_id('qr_submit_id').click()
+            while self.driver.url == self.confirm_passenger:
+                if not self.driver.find_by_id('qr_submit_id').first.visible:
+                    self.driver.find_by_id('back_edit_id').click()
+                else:
+                    print("点击了预订")
+                    # 不注释这句活会直接下单，一天取消3次会被封号一天
+                    # self.driver.find_by_id('qr_submit_id').click()
             print('预订成功...')
             sleep(1000)
         except Exception as e:
             print(e)
 
-
-    def add_passengers(self, name):
-        self.driver = Browser(driver_name=self.driver_name, executable_path=self.executable_path)
-        self.add_name = name
 
 
 
@@ -126,12 +129,12 @@ if __name__ == '__main__':
         'kunming': '%u6606%u660E%2CKMM',
         'xuzhou': '%u5F90%u5DDE%2CXCH'
     }
-    name = ['李强', '陈歌']
-    order = 0
-    passengers = [name[1]]
-    dtime = '2018-02-14'
+    name = ['李强', '陈歌', '缪溪遥']
+    order = 1
+    passengers = [name[2]]
+    dtime = '2018-02-15'
     starts = area['shenzhen']
-    ends = area['xuzhou']
+    ends = area['kunming']
 
     seat_level = ['二等座']
     person_level = ['成人票']

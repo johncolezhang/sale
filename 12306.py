@@ -121,7 +121,7 @@ class Buy_Tickets(object):
 
 if __name__ == '__main__':
     username = '1148697133@qq.com'
-    password = 'w913126'
+    password = ''
 
     area = {
         'shenzhen': '%u6DF1%u5733%2CSZQ',
@@ -129,12 +129,12 @@ if __name__ == '__main__':
         'kunming': '%u6606%u660E%2CKMM',
         'xuzhou': '%u5F90%u5DDE%2CXCH'
     }
-    name = ['李强', '陈歌', '缪溪遥']
+    name = ['李强', '陈歌', '缪溪遥','张可']
     order = 1
-    passengers = [name[2]]
-    dtime = '2018-02-15'
-    starts = area['shenzhen']
-    ends = area['kunming']
+    passengers = [name[3]]
+    dtime = '2018-02-22'
+    starts = area['kunming']
+    ends = area['shenzhen']
 
     seat_level = ['二等座']
     person_level = ['成人票']

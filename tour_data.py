@@ -90,9 +90,29 @@ if __name__ == "__main__":
         return ar
 
 
-    pd.DataFrame(np.array([[0, 0], [1, 1]])).to_csv("test.csv")
 
     train['age'] = pd.Series(deal_age_range(train['age'].values))
+
+    # sign_method = train['signup_method'].values
+    # sign_method_name = list(set(sign_method))
+    # sign_method_dict = dict(zip(sign_method_name, range(len(sign_method_name))))
+    # one_hot_sign_method = list(map(lambda x: sign_method_dict[x], sign_method))
+
+    def one_hot(train, name):
+        value = train[name].values
+        value_name = list(set(value))
+        value_dict = dict(zip(value_name, range(len(value_name))))
+        return list(map(lambda x: value_dict[x], value))
+
+    train['signup_method'] = pd.Series(one_hot(train, 'signup_method'))
+    train['affiliate_channel'] = pd.Series(one_hot(train, 'affiliate_channel'))
+    train['affiliate_provider'] = pd.Series(one_hot(train, 'affiliate_provider'))
+    train['first_affiliate'] = pd.Series(one_hot(train, 'first_affiliate'))
+    train['signup_app'] = pd.Series(one_hot(train, 'signup_app'))
+    train['first_device'] = pd.Series(one_hot(train, 'first_device'))
+    train['first_browser'] = pd.Series(one_hot(train, 'first_browser'))
+
+
 
     print(set(train['signup_method'].values))
     print(set(train['signup_flow'].values))
@@ -103,7 +123,7 @@ if __name__ == "__main__":
     print(set(train['first_device'].values))
     print(set(train['first_browser'].values))
 
-    age_gender_feature = list(map(lambda x: x + "age_gender", country_name))
+    age_gender_feature = list(map(lambda x: x + "_age_gender", country_name))
 
     ages = train['age'].values
     genders = train['gender'].values
@@ -129,22 +149,32 @@ if __name__ == "__main__":
     age_gender_dict = dict(zip(age_gender_name, age_gender_value))
 
     first = True
+    ag_fram = []
     for i in range(len(ages)):
         if (i + 1) % 10000 == 0:
             print(round(i / len(ages) * 100, 2), "%")
-        ag_dict_value = age_gender_dict[ages[i] + '_' + genders[i]]
+        ag_fram.extend(age_gender_dict[ages[i] + '_' + genders[i]])
+        #ag_dict_value = age_gender_dict[ages[i] + '_' + genders[i]]
+    ag_fram = pd.DataFrame(np.array(ag_fram).reshape((-1, len(country_name))))
+    ag_fram.columns = age_gender_feature
 
-        if first:
-            country_infos = np.array(ag_dict_value)
-            first = False
-        else:
-            country_infos = np.vstack((country_infos, np.array(ag_dict_value)))
+    train = pd.concat([train, ag_fram], axis=1, join_axes=[train.index])
+
+    # print(train.head(20))
 
 
-    country_infos = np.vstack((age_gender_feature, country_infos))
 
-    ag_frame = pd.DataFrame(country_infos)
-    ag_frame.to_csv("data/ag_fram.csv")
+    #     if first:
+    #         country_infos = np.array(ag_dict_value)
+    #         first = False
+    #     else:
+    #         country_infos = np.vstack((country_infos, np.array(ag_dict_value)))
+    #
+    #
+    # country_infos = np.vstack((age_gender_feature, country_infos))
+
+    #ag_frame = pd.DataFrame(country_infos)
+    #ag_frame.to_csv("data/ag_fram.csv")
 
 
 
